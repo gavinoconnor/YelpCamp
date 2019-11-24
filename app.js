@@ -1,39 +1,90 @@
+//Variables
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
+//mongoose deprecation fixes
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+
+mongoose.connect("mongodb://localhost/yelp_camp");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-let campgrounds = [
-{name: "Salmon Creek", image: "https://images.unsplash.com/photo-1537565266759-34bbc16be345?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"},
-{name: "Granite Hill", image: "https://images.unsplash.com/photo-1508873696983-2dfd5898f08b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"},
-{name: "Balder's Pass", image: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"},
-{name: "Salmon Creek", image: "https://images.unsplash.com/photo-1537565266759-34bbc16be345?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"},
-{name: "Granite Hill", image: "https://images.unsplash.com/photo-1508873696983-2dfd5898f08b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"},
-{name: "Balder's Pass", image: "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60"}
-];
+//Schema setup
+const campgroundSchema = new mongoose.Schema({
+  name: String,
+  image: String,
+  description: String
+});
 
+const Campground = mongoose.model("Campground", campgroundSchema);
+
+// Campground.create(
+//   {
+//     name: "Granite Hill",
+//     image: "https://farm1.staticflickr.com/60/215827008_6489cd30c3.jpg",
+//     description: "Huge granite hill. No bathrooms. No water."
+//   }, function(err, campground) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       console.log("Newly created campground:");
+//       console.log(campground);
+//     }
+//   });
+
+//Routes
 app.get("/", function(req, res) {
   res.render("landing");
   })
 
+//INDEX route
 app.get("/campgrounds", function(req, res) {
-  res.render("campgrounds", {campgrounds: campgrounds});
+  Campground.find({}, function(err, allCampgrounds){
+    if (err) {
+      console.log(err);
+    } else {
+      res.render("index", {campgrounds: allCampgrounds});
+    }
+  });
 });
 
+//CREATE route
 app.post("/campgrounds", function(req, res){
   let name = req.body.name;
   let image = req.body.image;
-  let newCampground = {name: name, image: image}
-  campgrounds.push(newCampground);
-  res.redirect("/campgrounds");
+  let desc = req.body.description;
+  let newCampground = {name: name, image: image, description: desc}
+  Campground.create(newCampground, function(err, newlyCreated) {
+    if(err) {
+      console.log(err);
+    } else {
+      res.redirect("/campgrounds");
+    }
+  });
 });
 
+//NEW route
 app.get("/campgrounds/new", function(req, res){
   res.render("new")
 });
 
+//SHOW route
+app.get("/campgrounds/:id", function(req, res){
+  Campground.findById(req.params.id, function(err, foundCampground) {
+    if(err) {
+      console.log(err);
+    } else {
+      res.render("show", {campground: foundCampground});
+    }
+  });
+});
+
+//Server connect
 app.listen(3000, function() {
   console.log("YelpCamp Server Has Started.")
 })
