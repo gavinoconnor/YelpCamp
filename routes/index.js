@@ -18,10 +18,10 @@ router.post("/register", function(req, res) {
   let newUser = new User({username: req.body.username})
   User.register(newUser, req.body.password, function(err, user){
     if(err) {
-      console.log(err)
-      return res.render("register");
+      return res.render("register", {"error": err.message});
     }
     passport.authenticate("local")(req, res, function(){
+      req.flash("success", "Welcome to YelpCamp, " + user.username);
       res.redirect("/campgrounds");
     });
   });
@@ -42,15 +42,9 @@ router.post("/login", passport.authenticate("local",
 //Logout route
 router.get("/logout", function(req, res){
   req.logout();
+  req.flash("success", "Succesfully logged out.")
   res.redirect("/campgrounds");
 });
 
-//middleware
-function isLoggedIn(req, res, next){
-  if(req.isAuthenticated()){
-    return next();
-  }
-  res.redirect("/login");
-}
 
 module.exports = router;
