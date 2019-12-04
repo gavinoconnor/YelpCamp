@@ -1,11 +1,16 @@
 <% include ./partials/header %>
-<h1>Sign Up</h1>
 
-
-<form class="" action="/register" method="POST">
-  <input type="text" name="username" placeholder="username">
-  <input type="password" name="password" placeholder="password">
-  <button type="submit">Sign Up</button>
-</form>
+<div class="container">
+  <div class="jumbotron">
+    <h2>Sign Up</h2>
+    <form class="form-inline" action="/register" method="POST">
+      <div class="form-group">
+        <input class="form-control" type="text" name="username" placeholder="username">
+        <input class="form-control" type="password" name="password" placeholder="password">
+      </div>
+      <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+  </div>
+</div>
 
 <% include ./partials/footer %>
