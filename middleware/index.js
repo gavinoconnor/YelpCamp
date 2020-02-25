@@ -1,5 +1,8 @@
 const Campground = require("../models/campground");
 const Comment = require("../models/comment");
+const Review = require("../models/review");
+
+
 const middlewareObj = {};
 
 middlewareObj.checkCampgroundOwnership = function(req, res, next){
@@ -41,6 +44,49 @@ middlewareObj.checkCommentOwnership = function(req, res, next){
       req.flash("error", "You need to be logged in to do that.")
       res.redirect("back");
   }
+};
+
+middlewareObj.checkReviewOwnership = function(req, res, next) {
+    if(req.isAuthenticated()){
+        Review.findById(req.params.review_id, function(err, foundReview){
+            if(err){
+                res.redirect("back");
+            }  else {
+                if(foundReview.author.id.equals(req.user._id)) {
+                    next();
+                } else {
+                    req.flash("error", "You don't have permission to do that");
+                    res.redirect("back");
+                }
+            }
+        });
+    } else {
+        req.flash("error", "You need to be logged in to do that");
+        res.redirect("back");
+    }
+};
+
+middlewareObj.checkReviewExistence = function (req, res, next) {
+    if (req.isAuthenticated()) {
+        Campground.findById(req.params.id).populate("reviews").exec(function (err, foundCampground) {
+            if (err) {
+                req.flash("error", "Campground not found.");
+                res.redirect("back");
+            } else {
+                let foundUserReview = foundCampground.reviews.some(function (review) {
+                    return review.author.id.equals(req.user._id);
+                });
+                if (foundUserReview) {
+                    req.flash("error", "You already wrote a review.");
+                    return res.redirect("/campgrounds/" + foundCampground._id);
+                }
+                next();
+            }
+        });
+    } else {
+        req.flash("error", "You need to login first.");
+        res.redirect("back");
+    }
 };
 
 middlewareObj.isLoggedIn = function(req, res, next){

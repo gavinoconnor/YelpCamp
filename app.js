@@ -16,6 +16,7 @@ const User = require("./models/user");
 //Requiring routes
 const commentRoutes = require("./routes/comments");
 const campgroundRoutes = require("./routes/campgrounds");
+const reviewRoutes = require("./routes/reviews");
 const indexRoutes = require("./routes/index")
 
 //Mongoose deprecation fixes
@@ -55,6 +56,7 @@ app.use(function(req, res, next){
 app.use("/", indexRoutes);
 app.use("/campgrounds", campgroundRoutes);
 app.use("/campgrounds/:id/comments", commentRoutes);
+app.use("/campgrounds/:id/reviews", reviewRoutes);
 
 //Server connect
 app.listen(3000, function() {
