@@ -1,14 +1,12 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({mergeParams: true});
 const Campground = require("../models/campground");
 const Review = require("../models/review");
 const middleware = require("../middleware");
 
 //Index route
 router.get("/", function (req, res) {
-    Campground.findById(req.params.id).populate({
-        path: "reviews",
-    }).exec(function (err, campground) {
+    Campground.findById(req.params.id).populate("reviews").exec(function (err, campground) {
         if (err) {
           console.log(err);
         }
@@ -17,7 +15,7 @@ router.get("/", function (req, res) {
 });
 
 //New route
-router.get("/new", middleware.isLoggedIn, middleware.checkReviewExistence, function (req, res) {
+router.get("/new", middleware.isLoggedIn, function (req, res) {
     Campground.findById(req.params.id, function (err, campground) {
         if (err) {
             req.flash("error", err.message);
@@ -29,7 +27,7 @@ router.get("/new", middleware.isLoggedIn, middleware.checkReviewExistence, funct
 });
 
 //Create route
-router.post("/", middleware.isLoggedIn, middleware.checkReviewExistence, function (req, res) {
+router.post("/", middleware.isLoggedIn, function (req, res) {
     Campground.findById(req.params.id).populate("reviews").exec(function (err, campground) {
         if (err) {
             req.flash("error", err.message);

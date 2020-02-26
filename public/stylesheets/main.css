@@ -10,6 +10,10 @@
   padding: 9px;
 }
 
+.checked {
+  color: orange;
+}
+
 .delete-form {
   display: inline;
 }
